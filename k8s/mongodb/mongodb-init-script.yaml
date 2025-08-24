@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-init-replica
+  labels:
+    app: mongodb-init
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - name: mongo-init
+        image: mongo:4.4
+        command:
+        - /bin/bash
+        - -c
+        - |
+          sleep 30
+          mongo mongodb-0.mongodb-headless.default.svc.cluster.local:27017 /config/init-replica.js
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+      restartPolicy: OnFailure
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mongodb-config
